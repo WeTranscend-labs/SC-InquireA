@@ -5,6 +5,15 @@ contract InquireA {
     address public owner;
     uint256 public voteFee = 0.01 ether; 
     uint256 public questionIdCounter;
+     uint256 public constant WEEK = 7 days;
+    uint256 public constant TWO_WEEKS = 14 days;
+    uint256 public constant MONTH = 30 days;
+
+    enum DeadlinePeriod {
+        OneWeek,
+        TwoWeeks,
+        OneMonth
+    }
 
 struct Question {
     address asker;
@@ -60,42 +69,52 @@ struct Question {
     }
 
     // Đặt câu hỏi với category là string
-function askQuestion(
-    string memory _questionText, 
-    string memory _category,
-    uint256 _deadline  // Cho phép custom deadline
-) public payable {
-    require(msg.value > 0, "Reward must be greater than zero");
-    require(bytes(_category).length > 0, "Category cannot be empty");
-    require(_deadline > block.timestamp, "Deadline must be in the future");
-    
-    uint256 questionId = questionIdCounter++;
-    questions[questionId] = Question({
-        asker: msg.sender,
-        questionText: _questionText,
-        category: _category,
-        rewardAmount: msg.value,
-        createdAt: block.timestamp,
-        deadline: _deadline,  // Sử dụng deadline được truyền vào
-        isClosed: false,
-        chosenAnswerId: 0
-    });
-}
+    function askQuestion(
+        string memory _questionText, 
+        string memory _category,
+        DeadlinePeriod _deadlinePeriod
+    ) public payable {
+        require(msg.value > 0, "Reward must be greater than zero");
+        require(bytes(_category).length > 0, "Category cannot be empty");
+        
+        uint256 deadline;
+        if (_deadlinePeriod == DeadlinePeriod.OneWeek) {
+            deadline = block.timestamp + WEEK;
+        } else if (_deadlinePeriod == DeadlinePeriod.TwoWeeks) {
+            deadline = block.timestamp + TWO_WEEKS;
+        } else if (_deadlinePeriod == DeadlinePeriod.OneMonth) {
+            deadline = block.timestamp + MONTH;
+        }
+        
+        uint256 questionId = questionIdCounter++;
+        questions[questionId] = Question({
+            asker: msg.sender,
+            questionText: _questionText,
+            category: _category,
+            rewardAmount: msg.value,
+            createdAt: block.timestamp,
+            deadline: deadline,
+            isClosed: false,
+            chosenAnswerId: 0
+        });
+
+        emit QuestionAsked(questionId, msg.sender, _questionText, msg.value, _category);
+    }
 
     // Trả lời câu hỏi
-function submitAnswer(uint256 questionId, string memory _answerText) public questionExists(questionId) notClosed(questionId) {
-    Question memory question = questions[questionId];
-    require(block.timestamp <= question.deadline, "Question deadline has passed");
+    function submitAnswer(uint256 questionId, string memory _answerText) public questionExists(questionId) notClosed(questionId) {
+        Question memory question = questions[questionId];
+        require(block.timestamp <= question.deadline, "Question deadline has passed");
 
-    uint256 answerId = uint256(keccak256(abi.encodePacked(msg.sender, block.timestamp)));
-    answers[questionId][answerId] = Answer({
-        responder: msg.sender,
-        answerText: _answerText,
-        upvotes: 0,
-        rewardAmount: 0,
-        createdAt: block.timestamp
-    });
-}
+        uint256 answerId = uint256(keccak256(abi.encodePacked(msg.sender, block.timestamp)));
+        answers[questionId][answerId] = Answer({
+            responder: msg.sender,
+            answerText: _answerText,
+            upvotes: 0,
+            rewardAmount: 0,
+            createdAt: block.timestamp
+        });
+    }
 
     // Bỏ phiếu
     function voteForAnswer(uint256 questionId, uint256 answerId) public payable questionExists(questionId) notClosed(questionId) {

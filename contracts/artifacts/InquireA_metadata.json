@@ -123,6 +123,45 @@
 				"type": "event"
 			},
 			{
+				"inputs": [],
+				"name": "MONTH",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "TWO_WEEKS",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "WEEK",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [
 					{
 						"internalType": "uint256",
@@ -179,9 +218,9 @@
 						"type": "string"
 					},
 					{
-						"internalType": "uint256",
-						"name": "_deadline",
-						"type": "uint256"
+						"internalType": "enum InquireA.DeadlinePeriod",
+						"name": "_deadlinePeriod",
+						"type": "uint8"
 					}
 				],
 				"name": "askQuestion",
@@ -436,11 +475,11 @@
 	},
 	"sources": {
 		"contracts/InquireA.sol": {
-			"keccak256": "0xb960f64fc96ce908d6f0ab59dd37baa909320762ec1bd50ad46a510092d6a74d",
+			"keccak256": "0x199651593312083632116e8ec6df49748e51147359410b7dc96a44502511ea0e",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://b385f21c61e3f3888a7a4e7e1b93bab4a85ecfa2d715fc26e9ddaf24e66cf3e8",
-				"dweb:/ipfs/QmT9d83FLAYS2zXxn8TtTB4nxw8bkSqJVyaa74D9LBw6B8"
+				"bzz-raw://7cfbb7b8eb91f4620400eead83ae37e34559315609c509130b03f7e4a3db1052",
+				"dweb:/ipfs/Qmcr8pHQmgtFQN31EPzh9DZmD7FhwF7N9nqPoaHiZXKAtg"
 			]
 		}
 	},
