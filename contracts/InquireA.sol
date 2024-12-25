@@ -18,6 +18,7 @@ contract InquireA {
 struct Question {
     address asker;
     string questionText;
+    string questionContent; 
     string category;
     uint256 rewardAmount;
     uint256 createdAt;
@@ -69,37 +70,39 @@ struct Question {
     }
 
     // Đặt câu hỏi với category là string
-    function askQuestion(
-        string memory _questionText, 
-        string memory _category,
-        DeadlinePeriod _deadlinePeriod
-    ) public payable {
-        require(msg.value > 0, "Reward must be greater than zero");
-        require(bytes(_category).length > 0, "Category cannot be empty");
-        
-        uint256 deadline;
-        if (_deadlinePeriod == DeadlinePeriod.OneWeek) {
-            deadline = block.timestamp + WEEK;
-        } else if (_deadlinePeriod == DeadlinePeriod.TwoWeeks) {
-            deadline = block.timestamp + TWO_WEEKS;
-        } else if (_deadlinePeriod == DeadlinePeriod.OneMonth) {
-            deadline = block.timestamp + MONTH;
-        }
-        
-        uint256 questionId = questionIdCounter++;
-        questions[questionId] = Question({
-            asker: msg.sender,
-            questionText: _questionText,
-            category: _category,
-            rewardAmount: msg.value,
-            createdAt: block.timestamp,
-            deadline: deadline,
-            isClosed: false,
-            chosenAnswerId: 0
-        });
-
-        emit QuestionAsked(questionId, msg.sender, _questionText, msg.value, _category);
+function askQuestion(
+    string memory _questionText,
+    string memory _questionContent, // Thêm tham số mới
+    string memory _category,
+    DeadlinePeriod _deadlinePeriod
+) public payable {
+    require(msg.value > 0, "Reward must be greater than zero");
+    require(bytes(_category).length > 0, "Category cannot be empty");
+    
+    uint256 deadline;
+    if (_deadlinePeriod == DeadlinePeriod.OneWeek) {
+        deadline = block.timestamp + WEEK;
+    } else if (_deadlinePeriod == DeadlinePeriod.TwoWeeks) {
+        deadline = block.timestamp + TWO_WEEKS;
+    } else if (_deadlinePeriod == DeadlinePeriod.OneMonth) {
+        deadline = block.timestamp + MONTH;
     }
+    
+    uint256 questionId = questionIdCounter++;
+    questions[questionId] = Question({
+        asker: msg.sender,
+        questionText: _questionText,
+        questionContent: _questionContent, // Thêm trường mới
+        category: _category,
+        rewardAmount: msg.value,
+        createdAt: block.timestamp,
+        deadline: deadline,
+        isClosed: false,
+        chosenAnswerId: 0
+    });
+
+    emit QuestionAsked(questionId, msg.sender, _questionText, msg.value, _category);
+}
 
     function getQuestions(uint256 pageIndex, uint256 pageSize) 
         public 

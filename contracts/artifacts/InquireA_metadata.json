@@ -1,6 +1,6 @@
 {
 	"compiler": {
-		"version": "0.8.28+commit.7893614a"
+		"version": "0.8.26+commit.8a97fa7a"
 	},
 	"language": "Solidity",
 	"output": {
@@ -214,6 +214,11 @@
 					},
 					{
 						"internalType": "string",
+						"name": "_questionContent",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
 						"name": "_category",
 						"type": "string"
 					},
@@ -320,6 +325,11 @@
 							},
 							{
 								"internalType": "string",
+								"name": "questionContent",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
 								"name": "category",
 								"type": "string"
 							},
@@ -420,6 +430,11 @@
 					{
 						"internalType": "string",
 						"name": "questionText",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "questionContent",
 						"type": "string"
 					},
 					{
@@ -534,28 +549,18 @@
 			"bytecodeHash": "ipfs"
 		},
 		"optimizer": {
-			"details": {
-				"constantOptimizer": false,
-				"cse": false,
-				"deduplicate": false,
-				"inliner": false,
-				"jumpdestRemover": false,
-				"orderLiterals": false,
-				"peephole": false,
-				"simpleCounterForLoopUncheckedIncrement": true,
-				"yul": false
-			},
+			"enabled": false,
 			"runs": 200
 		},
 		"remappings": []
 	},
 	"sources": {
 		"contracts/InquireA.sol": {
-			"keccak256": "0xf340898fd17a009205c062d8a5e1430eb68b17fa69ad699d63f6261ab2e5c973",
+			"keccak256": "0x80f4aec8602141392cd10a4115c6b0aea8078fb16d7d97d49adf129284bcf6f0",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://92641629d351e5a7be3f443aee0eee43a684162fc93f7140f3b42c295fb15404",
-				"dweb:/ipfs/QmSmoi6hPb9ustdHX1MopJYf4SoAvhNWgCdhJA5u6fyCuK"
+				"bzz-raw://c43f60d7b7938e81ffdfed456e9f736a169156664080bb01cd9bbcb569ebcfcf",
+				"dweb:/ipfs/QmUVbT7CysAvF13oqr3kSSrepkFAGKWw5k3SD3e7cAbTJx"
 			]
 		}
 	},
