@@ -101,6 +101,35 @@ struct Question {
         emit QuestionAsked(questionId, msg.sender, _questionText, msg.value, _category);
     }
 
+    function getQuestions(uint256 pageIndex, uint256 pageSize) 
+        public 
+        view 
+        returns (Question[] memory) 
+    {
+        require(pageIndex > 0, "Page index must start from 1");
+        require(pageSize > 0, "Page size must be greater than 0");
+
+        uint256 startIndex = (pageIndex - 1) * pageSize;
+        require(startIndex < questionIdCounter, "Invalid page index");
+
+        uint256 endIndex = startIndex + pageSize;
+        if (endIndex > questionIdCounter) {
+            endIndex = questionIdCounter; // Đảm bảo không vượt quá số lượng câu hỏi
+        }
+
+        uint256 resultSize = endIndex - startIndex;
+        Question[] memory paginatedQuestions = new Question[](resultSize);
+
+        for (uint256 i = startIndex; i < endIndex; i++) {
+            paginatedQuestions[i - startIndex] = questions[i];
+        }
+
+        return paginatedQuestions;
+    }
+
+
+
+
     // Trả lời câu hỏi
     function submitAnswer(uint256 questionId, string memory _answerText) public questionExists(questionId) notClosed(questionId) {
         Question memory question = questions[questionId];

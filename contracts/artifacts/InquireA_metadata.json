@@ -1,6 +1,6 @@
 {
 	"compiler": {
-		"version": "0.8.26+commit.8a97fa7a"
+		"version": "0.8.28+commit.7893614a"
 	},
 	"language": "Solidity",
 	"output": {
@@ -294,6 +294,72 @@
 			{
 				"inputs": [
 					{
+						"internalType": "uint256",
+						"name": "pageIndex",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pageSize",
+						"type": "uint256"
+					}
+				],
+				"name": "getQuestions",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "address",
+								"name": "asker",
+								"type": "address"
+							},
+							{
+								"internalType": "string",
+								"name": "questionText",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "category",
+								"type": "string"
+							},
+							{
+								"internalType": "uint256",
+								"name": "rewardAmount",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "createdAt",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "deadline",
+								"type": "uint256"
+							},
+							{
+								"internalType": "bool",
+								"name": "isClosed",
+								"type": "bool"
+							},
+							{
+								"internalType": "uint256",
+								"name": "chosenAnswerId",
+								"type": "uint256"
+							}
+						],
+						"internalType": "struct InquireA.Question[]",
+						"name": "",
+						"type": "tuple[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
 						"internalType": "string",
 						"name": "_category",
 						"type": "string"
@@ -468,18 +534,28 @@
 			"bytecodeHash": "ipfs"
 		},
 		"optimizer": {
-			"enabled": false,
+			"details": {
+				"constantOptimizer": false,
+				"cse": false,
+				"deduplicate": false,
+				"inliner": false,
+				"jumpdestRemover": false,
+				"orderLiterals": false,
+				"peephole": false,
+				"simpleCounterForLoopUncheckedIncrement": true,
+				"yul": false
+			},
 			"runs": 200
 		},
 		"remappings": []
 	},
 	"sources": {
 		"contracts/InquireA.sol": {
-			"keccak256": "0x199651593312083632116e8ec6df49748e51147359410b7dc96a44502511ea0e",
+			"keccak256": "0xf340898fd17a009205c062d8a5e1430eb68b17fa69ad699d63f6261ab2e5c973",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://7cfbb7b8eb91f4620400eead83ae37e34559315609c509130b03f7e4a3db1052",
-				"dweb:/ipfs/Qmcr8pHQmgtFQN31EPzh9DZmD7FhwF7N9nqPoaHiZXKAtg"
+				"bzz-raw://92641629d351e5a7be3f443aee0eee43a684162fc93f7140f3b42c295fb15404",
+				"dweb:/ipfs/QmSmoi6hPb9ustdHX1MopJYf4SoAvhNWgCdhJA5u6fyCuK"
 			]
 		}
 	},
