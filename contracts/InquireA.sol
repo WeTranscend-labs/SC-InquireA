@@ -5,7 +5,8 @@ contract InquireA {
     address public owner;
     uint256 public voteFee = 0.01 ether; 
     uint256 public questionIdCounter;
-     uint256 public constant WEEK = 7 days;
+    uint256 public answerIdCounter;  // Thêm biến đếm cho answerId
+    uint256 public constant WEEK = 7 days;
     uint256 public constant TWO_WEEKS = 14 days;
     uint256 public constant MONTH = 30 days;
 
@@ -15,19 +16,21 @@ contract InquireA {
         OneMonth
     }
 
-struct Question {
-    address asker;
-    string questionText;
-    string questionContent; 
-    string category;
-    uint256 rewardAmount;
-    uint256 createdAt;
-    uint256 deadline;  
-    bool isClosed;
-    uint256 chosenAnswerId;
-}
+    struct Question {
+        uint256 id;  // Thêm trường id cho Question
+        address asker;
+        string questionText;
+        string questionContent;
+        string category;
+        uint256 rewardAmount;
+        uint256 createdAt;
+        uint256 deadline;
+        bool isClosed;
+        uint256 chosenAnswerId;
+    }
 
     struct Answer {
+        uint256 id;  // Thêm trường id cho Answer
         address responder;
         string answerText;
         uint256 upvotes;
@@ -52,6 +55,8 @@ struct Question {
 
     constructor() {
         owner = msg.sender;
+        questionIdCounter = 1;  // Bắt đầu từ id 1
+        answerIdCounter = 1;  // Bắt đầu từ id 1
     }
 
     modifier onlyOwner() {
@@ -70,97 +75,82 @@ struct Question {
     }
 
     // Đặt câu hỏi với category là string
-function askQuestion(
-    string memory _questionText,
-    string memory _questionContent, // Thêm tham số mới
-    string memory _category,
-    DeadlinePeriod _deadlinePeriod
-) public payable {
-    require(msg.value > 0, "Reward must be greater than zero");
-    require(bytes(_category).length > 0, "Category cannot be empty");
-    
-    uint256 deadline;
-    if (_deadlinePeriod == DeadlinePeriod.OneWeek) {
-        deadline = block.timestamp + WEEK;
-    } else if (_deadlinePeriod == DeadlinePeriod.TwoWeeks) {
-        deadline = block.timestamp + TWO_WEEKS;
-    } else if (_deadlinePeriod == DeadlinePeriod.OneMonth) {
-        deadline = block.timestamp + MONTH;
-    }
-    
-    uint256 questionId = questionIdCounter++;
-    questions[questionId] = Question({
-        asker: msg.sender,
-        questionText: _questionText,
-        questionContent: _questionContent, // Thêm trường mới
-        category: _category,
-        rewardAmount: msg.value,
-        createdAt: block.timestamp,
-        deadline: deadline,
-        isClosed: false,
-        chosenAnswerId: 0
-    });
+    function askQuestion(
+        string memory _questionText,
+        string memory _questionContent, 
+        string memory _category,
+        DeadlinePeriod _deadlinePeriod
+    ) public payable {
+        require(msg.value > 0, "Reward must be greater than zero");
+        require(bytes(_category).length > 0, "Category cannot be empty");
 
-    emit QuestionAsked(questionId, msg.sender, _questionText, msg.value, _category);
-}
-
-    function getQuestions(uint256 pageIndex, uint256 pageSize) 
-        public 
-        view 
-        returns (Question[] memory) 
-    {
-        require(pageIndex > 0, "Page index must start from 1");
-        require(pageSize > 0, "Page size must be greater than 0");
-
-        uint256 startIndex = (pageIndex - 1) * pageSize;
-        require(startIndex < questionIdCounter, "Invalid page index");
-
-        uint256 endIndex = startIndex + pageSize;
-        if (endIndex > questionIdCounter) {
-            endIndex = questionIdCounter; // Đảm bảo không vượt quá số lượng câu hỏi
+        uint256 deadline;
+        if (_deadlinePeriod == DeadlinePeriod.OneWeek) {
+            deadline = block.timestamp + WEEK;
+        } else if (_deadlinePeriod == DeadlinePeriod.TwoWeeks) {
+            deadline = block.timestamp + TWO_WEEKS;
+        } else if (_deadlinePeriod == DeadlinePeriod.OneMonth) {
+            deadline = block.timestamp + MONTH;
         }
+        
+        uint256 questionId = questionIdCounter++;
+        questions[questionId] = Question({
+            id: questionId,
+            asker: msg.sender,
+            questionText: _questionText,
+            questionContent: _questionContent, 
+            category: _category,
+            rewardAmount: msg.value,
+            createdAt: block.timestamp,
+            deadline: deadline,
+            isClosed: false,
+            chosenAnswerId: 0
+        });
 
-        uint256 resultSize = endIndex - startIndex;
-        Question[] memory paginatedQuestions = new Question[](resultSize);
-
-        for (uint256 i = startIndex; i < endIndex; i++) {
-            paginatedQuestions[i - startIndex] = questions[i];
-        }
-
-        return paginatedQuestions;
+        emit QuestionAsked(questionId, msg.sender, _questionText, msg.value, _category);
     }
-
-
-
 
     // Trả lời câu hỏi
     function submitAnswer(uint256 questionId, string memory _answerText) public questionExists(questionId) notClosed(questionId) {
         Question memory question = questions[questionId];
         require(block.timestamp <= question.deadline, "Question deadline has passed");
 
-        uint256 answerId = uint256(keccak256(abi.encodePacked(msg.sender, block.timestamp)));
+        uint256 answerId = answerIdCounter++;
         answers[questionId][answerId] = Answer({
+            id: answerId,
             responder: msg.sender,
             answerText: _answerText,
             upvotes: 0,
             rewardAmount: 0,
             createdAt: block.timestamp
         });
+
+        emit AnswerSubmitted(questionId, answerId, msg.sender, _answerText);
     }
 
-    // Bỏ phiếu
+    function getQuestionById(uint256 questionId) public view returns (Question memory) {
+        require(questions[questionId].asker != address(0), "Question does not exist");
+        return questions[questionId];
+    }
+
+    function getAnswerById(uint256 questionId, uint256 answerId) public view returns (Answer memory) {
+        require(answers[questionId][answerId].responder != address(0), "Answer does not exist");
+        return answers[questionId][answerId];
+    }
+
     function voteForAnswer(uint256 questionId, uint256 answerId) public payable questionExists(questionId) notClosed(questionId) {
         Question memory question = questions[questionId];
         require(block.timestamp <= question.deadline, "Voting period has ended");
-        
+
         require(msg.value == voteFee, "Incorrect vote fee");
 
         Answer storage answer = answers[questionId][answerId];
         answer.upvotes += 1;
         questions[questionId].rewardAmount += msg.value;
+
+        emit Voted(questionId, answerId, msg.sender);
     }
 
-    // Đóng câu hỏi
     function closeQuestion(uint256 questionId, uint256 answerId) public questionExists(questionId) notClosed(questionId) {
         Question storage question = questions[questionId];
         require(msg.sender == question.asker, "Only asker can close question");
@@ -181,12 +171,12 @@ function askQuestion(
         uint256 totalReward = question.rewardAmount;
 
         // Tính tổng upvote
-        for (uint256 i = 0; i < questionIdCounter; i++) {
+        for (uint256 i = 0; i < answerIdCounter; i++) {
             totalUpvotes += answers[questionId][i].upvotes;
         }
 
         // Chia phần thưởng
-        for (uint256 i = 0; i < questionIdCounter; i++) {
+        for (uint256 i = 0; i < answerIdCounter; i++) {
             Answer storage answer = answers[questionId][i];
             if (totalUpvotes > 0) {
                 uint256 reward = (answer.upvotes * totalReward) / totalUpvotes;
@@ -202,7 +192,7 @@ function askQuestion(
     function withdraw() public {
         uint256 amount = balances[msg.sender];
         require(amount > 0, "No funds to withdraw");
-        
+
         balances[msg.sender] = 0;
         payable(msg.sender).transfer(amount);
     }
@@ -210,6 +200,7 @@ function askQuestion(
     function balance() public view returns (uint256) {
         return address(this).balance;
     }
+
 
     // Truy vấn câu hỏi theo category
     function getQuestionsByCategory(string memory _category) public view returns (uint256[] memory) {
