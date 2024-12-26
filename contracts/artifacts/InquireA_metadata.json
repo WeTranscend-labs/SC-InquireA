@@ -444,6 +444,82 @@
 			{
 				"inputs": [
 					{
+						"internalType": "uint256",
+						"name": "pageIndex",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pageSize",
+						"type": "uint256"
+					}
+				],
+				"name": "getQuestions",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "id",
+								"type": "uint256"
+							},
+							{
+								"internalType": "address",
+								"name": "asker",
+								"type": "address"
+							},
+							{
+								"internalType": "string",
+								"name": "questionText",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "questionContent",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "category",
+								"type": "string"
+							},
+							{
+								"internalType": "uint256",
+								"name": "rewardAmount",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "createdAt",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "deadline",
+								"type": "uint256"
+							},
+							{
+								"internalType": "bool",
+								"name": "isClosed",
+								"type": "bool"
+							},
+							{
+								"internalType": "uint256",
+								"name": "chosenAnswerId",
+								"type": "uint256"
+							}
+						],
+						"internalType": "struct InquireA.Question[]",
+						"name": "",
+						"type": "tuple[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
 						"internalType": "string",
 						"name": "_category",
 						"type": "string"
@@ -635,11 +711,11 @@
 	},
 	"sources": {
 		"contracts/InquireA.sol": {
-			"keccak256": "0xd38e05c3abe7b5d5d64868aabd6f6b01fa5e28c1e2dc4656cbcaead12c989176",
+			"keccak256": "0xf715713f2b77df9bc87eb933a91e928ef719ca84f06d61424e2791d0fa6c2521",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://35bd2aa0c7f2854967124aab9b04da0780f7ba8d428d0d17f4569dcf61d47a12",
-				"dweb:/ipfs/QmW7SvZ25P2CcMhA3y6fKcTwJEFC11d1PXUmFC3yEevixJ"
+				"bzz-raw://2c27502c2104f78ffe0ade149d7549cc4f0ff4a379f5b4384cc9c682b1adf5b7",
+				"dweb:/ipfs/QmYsSfV9KNJS6M3pJFhyQC7QDuqf9or7v6D3fagLfF1kmg"
 			]
 		}
 	},
