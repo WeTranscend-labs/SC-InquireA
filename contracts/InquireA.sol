@@ -3,9 +3,9 @@ pragma solidity ^0.8.0;
 
 contract InquireA {
     address public owner;
-    uint256 public voteFee = 0.01 ether; 
+    uint256 public voteFee = 0.01 ether;
     uint256 public questionIdCounter;
-    uint256 public answerIdCounter;  // Thêm biến đếm cho answerId
+    uint256 public answerIdCounter;
     uint256 public constant WEEK = 7 days;
     uint256 public constant TWO_WEEKS = 14 days;
     uint256 public constant MONTH = 30 days;
@@ -17,7 +17,7 @@ contract InquireA {
     }
 
     struct Question {
-        uint256 id;  // Thêm trường id cho Question
+        uint256 id; // Thêm trường id vào đây
         address asker;
         string questionText;
         string questionContent;
@@ -30,7 +30,6 @@ contract InquireA {
     }
 
     struct Answer {
-        uint256 id;  // Thêm trường id cho Answer
         address responder;
         string answerText;
         uint256 upvotes;
@@ -55,8 +54,8 @@ contract InquireA {
 
     constructor() {
         owner = msg.sender;
-        questionIdCounter = 1;  // Bắt đầu từ id 1
-        answerIdCounter = 1;  // Bắt đầu từ id 1
+        questionIdCounter = 1;  
+        answerIdCounter = 1;  
     }
 
     modifier onlyOwner() {
@@ -95,7 +94,7 @@ contract InquireA {
         
         uint256 questionId = questionIdCounter++;
         questions[questionId] = Question({
-            id: questionId,
+            id: questionId, // Gán id vào cấu trúc câu hỏi
             asker: msg.sender,
             questionText: _questionText,
             questionContent: _questionContent, 
@@ -117,7 +116,6 @@ contract InquireA {
 
         uint256 answerId = answerIdCounter++;
         answers[questionId][answerId] = Answer({
-            id: answerId,
             responder: msg.sender,
             answerText: _answerText,
             upvotes: 0,
@@ -128,31 +126,51 @@ contract InquireA {
         emit AnswerSubmitted(questionId, answerId, msg.sender, _answerText);
     }
 
-    function getQuestions(uint256 pageIndex, uint256 pageSize) 
-        public 
-        view 
-        returns (Question[] memory) 
-    {
-        require(pageIndex > 0, "Page index must start from 1");
-        require(pageSize > 0, "Page size must be greater than 0");
+    // Lấy câu hỏi theo chỉ mục (pagination)
+function getQuestions(uint256 pageIndex, uint256 pageSize) 
+    public 
+    view 
+    returns (
+        Question[] memory questionsList, 
+        uint256 totalQuestions, 
+        uint256 totalPages
+    ) 
+{
+    require(pageIndex > 0, "Page index must start from 1");
+    require(pageSize > 0, "Page size must be greater than 0");
 
-        uint256 startIndex = (pageIndex - 1) * pageSize;
-        require(startIndex < questionIdCounter, "Invalid page index");
+    totalQuestions = questionIdCounter - 1;
 
-        uint256 endIndex = startIndex + pageSize;
-        if (endIndex > questionIdCounter) {
-            endIndex = questionIdCounter; // Đảm bảo không vượt quá số lượng câu hỏi
-        }
-
-        uint256 resultSize = endIndex - startIndex;
-        Question[] memory paginatedQuestions = new Question[](resultSize);
-
-        for (uint256 i = startIndex; i < endIndex; i++) {
-            paginatedQuestions[i - startIndex] = questions[i];
-        }
-
-        return paginatedQuestions;
+    // Trường hợp không có câu hỏi nào
+    if (totalQuestions == 0) {
+        return (new Question[](0), 0, 0);
     }
+
+    totalPages = (totalQuestions + pageSize - 1) / pageSize;
+
+    // Kiểm tra nếu pageIndex không hợp lệ
+    require(pageIndex <= totalPages, "Invalid page index");
+
+    uint256 startIndex = (pageIndex - 1) * pageSize + 1;
+    uint256 endIndex = startIndex + pageSize - 1;
+
+    if (endIndex > questionIdCounter - 1) {
+        endIndex = questionIdCounter - 1;
+    }
+
+    uint256 resultSize = endIndex - startIndex + 1;
+    questionsList = new Question[](resultSize);
+
+    uint256 index = 0;
+    for (uint256 i = startIndex; i <= endIndex; i++) {
+        questionsList[index] = questions[i];
+        index++;
+    }
+
+    return (questionsList, totalQuestions, totalPages);
+}
+
+
 
     function getQuestionById(uint256 questionId) public view returns (Question memory) {
         require(questions[questionId].asker != address(0), "Question does not exist");
@@ -214,7 +232,6 @@ contract InquireA {
         question.isClosed = true;
     }
 
-    // Các hàm khác giữ nguyên
     function withdraw() public {
         uint256 amount = balances[msg.sender];
         require(amount > 0, "No funds to withdraw");
@@ -227,13 +244,12 @@ contract InquireA {
         return address(this).balance;
     }
 
-
     // Truy vấn câu hỏi theo category
     function getQuestionsByCategory(string memory _category) public view returns (uint256[] memory) {
         uint256[] memory matchedQuestions = new uint256[](questionIdCounter);
         uint256 count = 0;
 
-        for (uint256 i = 0; i < questionIdCounter; i++) {
+        for (uint256 i = 1; i < questionIdCounter; i++) {
             if (keccak256(bytes(questions[i].category)) == keccak256(bytes(_category))) {
                 matchedQuestions[count] = i;
                 count++;

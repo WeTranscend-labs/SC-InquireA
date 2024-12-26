@@ -190,11 +190,6 @@
 				"name": "answers",
 				"outputs": [
 					{
-						"internalType": "uint256",
-						"name": "id",
-						"type": "uint256"
-					},
-					{
 						"internalType": "address",
 						"name": "responder",
 						"type": "address"
@@ -331,11 +326,6 @@
 				"outputs": [
 					{
 						"components": [
-							{
-								"internalType": "uint256",
-								"name": "id",
-								"type": "uint256"
-							},
 							{
 								"internalType": "address",
 								"name": "responder",
@@ -510,8 +500,18 @@
 							}
 						],
 						"internalType": "struct InquireA.Question[]",
-						"name": "",
+						"name": "questionsList",
 						"type": "tuple[]"
+					},
+					{
+						"internalType": "uint256",
+						"name": "totalQuestions",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "totalPages",
+						"type": "uint256"
 					}
 				],
 				"stateMutability": "view",
@@ -711,11 +711,11 @@
 	},
 	"sources": {
 		"contracts/InquireA.sol": {
-			"keccak256": "0xf715713f2b77df9bc87eb933a91e928ef719ca84f06d61424e2791d0fa6c2521",
+			"keccak256": "0x7053f8a0e3dc5e072ec0f9bbbbe3a7770de5bbc8ec87799968476e82c3eb5218",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://2c27502c2104f78ffe0ade149d7549cc4f0ff4a379f5b4384cc9c682b1adf5b7",
-				"dweb:/ipfs/QmYsSfV9KNJS6M3pJFhyQC7QDuqf9or7v6D3fagLfF1kmg"
+				"bzz-raw://9c00c9bba11ab1595032345e37b6b1bf70d4d74c93bc54bd15681cb66adddc7b",
+				"dweb:/ipfs/QmWApJazPdRhzi23RugUT4nJ3CQBYxFe2tVkytWJmWLApX"
 			]
 		}
 	},
