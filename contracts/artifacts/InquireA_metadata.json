@@ -715,6 +715,24 @@
 						"type": "uint256"
 					},
 					{
+						"internalType": "uint256",
+						"name": "answerId",
+						"type": "uint256"
+					}
+				],
+				"name": "selectBestAnswer",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "questionId",
+						"type": "uint256"
+					},
+					{
 						"internalType": "string",
 						"name": "_answerText",
 						"type": "string"
@@ -792,11 +810,11 @@
 	},
 	"sources": {
 		"contracts/InquireA.sol": {
-			"keccak256": "0x33e130dffb058e5d1e0fbe0532c055c9f85ab4a1f425188cbecb645d6a69c829",
+			"keccak256": "0x2aa5172a6b81e6c588e80f11f6ba72c8ebdd1458686f65d07bf5d7cfcae458eb",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://f9a0ae6fa097e92e1bbf3cf34f4830cb8c011155d3ad06c8272c8d170c77d34f",
-				"dweb:/ipfs/QmVDFeCp54nVgUB67UPuZ8S4nRcgUggDn7JB9wnqdvrC2R"
+				"bzz-raw://fad2e22e2bf3970fedee18bc8e528ff6d721ce5063a353fb90b52baa3a7bb652",
+				"dweb:/ipfs/Qmc1cbjFyBsVyw4MYjRJwcuR3ENAChgJiwz7bniNJwW59o"
 			]
 		}
 	},

@@ -172,7 +172,30 @@ contract InquireA {
         return (questionsList, totalQuestions, totalPages);
     }
 
+    function selectBestAnswer(uint256 questionId, uint256 answerId) public payable {
+        require(questions[questionId].asker != address(0), "Question does not exist");
+        
+        require(msg.sender == questions[questionId].asker, "Only question asker can select the best answer");
+        
+        require(answers[questionId][answerId].responder != address(0), "Answer does not exist");
+        
+        require(!questions[questionId].isClosed, "Question is already closed");
+        
+        // require(block.timestamp > questions[questionId].deadline, "Cannot select answer before deadline");
 
+        questions[questionId].isClosed = true;
+        questions[questionId].chosenAnswerId = answerId;
+
+        address bestResponder = answers[questionId][answerId].responder;
+        
+        uint256 totalReward = questions[questionId].rewardAmount;
+
+        answers[questionId][answerId].rewardAmount = totalReward;
+
+        payable(bestResponder).transfer(totalReward);
+
+        emit QuestionClosed(questionId, answerId);
+    }
 
     function getQuestionById(uint256 questionId) public view returns (Question memory) {
         require(questions[questionId].asker != address(0), "Question does not exist");
