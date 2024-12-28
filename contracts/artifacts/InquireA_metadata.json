@@ -190,6 +190,11 @@
 				"name": "answers",
 				"outputs": [
 					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
 						"internalType": "address",
 						"name": "responder",
 						"type": "address"
@@ -327,6 +332,11 @@
 					{
 						"components": [
 							{
+								"internalType": "uint256",
+								"name": "id",
+								"type": "uint256"
+							},
+							{
 								"internalType": "address",
 								"name": "responder",
 								"type": "address"
@@ -355,6 +365,77 @@
 						"internalType": "struct InquireA.Answer",
 						"name": "",
 						"type": "tuple"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "questionId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pageIndex",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pageSize",
+						"type": "uint256"
+					}
+				],
+				"name": "getAnswersByQuestionId",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "id",
+								"type": "uint256"
+							},
+							{
+								"internalType": "address",
+								"name": "responder",
+								"type": "address"
+							},
+							{
+								"internalType": "string",
+								"name": "answerText",
+								"type": "string"
+							},
+							{
+								"internalType": "uint256",
+								"name": "upvotes",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "rewardAmount",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "createdAt",
+								"type": "uint256"
+							}
+						],
+						"internalType": "struct InquireA.Answer[]",
+						"name": "answersList",
+						"type": "tuple[]"
+					},
+					{
+						"internalType": "uint256",
+						"name": "totalAnswers",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "totalPages",
+						"type": "uint256"
 					}
 				],
 				"stateMutability": "view",
@@ -711,11 +792,11 @@
 	},
 	"sources": {
 		"contracts/InquireA.sol": {
-			"keccak256": "0x7053f8a0e3dc5e072ec0f9bbbbe3a7770de5bbc8ec87799968476e82c3eb5218",
+			"keccak256": "0x33e130dffb058e5d1e0fbe0532c055c9f85ab4a1f425188cbecb645d6a69c829",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://9c00c9bba11ab1595032345e37b6b1bf70d4d74c93bc54bd15681cb66adddc7b",
-				"dweb:/ipfs/QmWApJazPdRhzi23RugUT4nJ3CQBYxFe2tVkytWJmWLApX"
+				"bzz-raw://f9a0ae6fa097e92e1bbf3cf34f4830cb8c011155d3ad06c8272c8d170c77d34f",
+				"dweb:/ipfs/QmVDFeCp54nVgUB67UPuZ8S4nRcgUggDn7JB9wnqdvrC2R"
 			]
 		}
 	},

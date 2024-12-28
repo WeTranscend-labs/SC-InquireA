@@ -30,6 +30,7 @@ contract InquireA {
     }
 
     struct Answer {
+        uint256 id;  // Thêm trường id
         address responder;
         string answerText;
         uint256 upvotes;
@@ -116,6 +117,7 @@ contract InquireA {
 
         uint256 answerId = answerIdCounter++;
         answers[questionId][answerId] = Answer({
+            id: answerId,  // Thêm id khi tạo answer
             responder: msg.sender,
             answerText: _answerText,
             upvotes: 0,
@@ -127,54 +129,122 @@ contract InquireA {
     }
 
     // Lấy câu hỏi theo chỉ mục (pagination)
-function getQuestions(uint256 pageIndex, uint256 pageSize) 
-    public 
-    view 
-    returns (
-        Question[] memory questionsList, 
-        uint256 totalQuestions, 
-        uint256 totalPages
-    ) 
-{
-    require(pageIndex > 0, "Page index must start from 1");
-    require(pageSize > 0, "Page size must be greater than 0");
+    function getQuestions(uint256 pageIndex, uint256 pageSize) 
+        public 
+        view 
+        returns (
+            Question[] memory questionsList, 
+            uint256 totalQuestions, 
+            uint256 totalPages
+        ) 
+    {
+        require(pageIndex > 0, "Page index must start from 1");
+        require(pageSize > 0, "Page size must be greater than 0");
 
-    totalQuestions = questionIdCounter - 1;
+        totalQuestions = questionIdCounter - 1;
 
-    // Trường hợp không có câu hỏi nào
-    if (totalQuestions == 0) {
-        return (new Question[](0), 0, 0);
+        // Trường hợp không có câu hỏi nào
+        if (totalQuestions == 0) {
+            return (new Question[](0), 0, 0);
+        }
+
+        totalPages = (totalQuestions + pageSize - 1) / pageSize;
+
+        // Kiểm tra nếu pageIndex không hợp lệ
+        require(pageIndex <= totalPages, "Invalid page index");
+
+        uint256 startIndex = (pageIndex - 1) * pageSize + 1;
+        uint256 endIndex = startIndex + pageSize - 1;
+
+        if (endIndex > questionIdCounter - 1) {
+            endIndex = questionIdCounter - 1;
+        }
+
+        uint256 resultSize = endIndex - startIndex + 1;
+        questionsList = new Question[](resultSize);
+
+        uint256 index = 0;
+        for (uint256 i = startIndex; i <= endIndex; i++) {
+            questionsList[index] = questions[i];
+            index++;
+        }
+
+        return (questionsList, totalQuestions, totalPages);
     }
-
-    totalPages = (totalQuestions + pageSize - 1) / pageSize;
-
-    // Kiểm tra nếu pageIndex không hợp lệ
-    require(pageIndex <= totalPages, "Invalid page index");
-
-    uint256 startIndex = (pageIndex - 1) * pageSize + 1;
-    uint256 endIndex = startIndex + pageSize - 1;
-
-    if (endIndex > questionIdCounter - 1) {
-        endIndex = questionIdCounter - 1;
-    }
-
-    uint256 resultSize = endIndex - startIndex + 1;
-    questionsList = new Question[](resultSize);
-
-    uint256 index = 0;
-    for (uint256 i = startIndex; i <= endIndex; i++) {
-        questionsList[index] = questions[i];
-        index++;
-    }
-
-    return (questionsList, totalQuestions, totalPages);
-}
 
 
 
     function getQuestionById(uint256 questionId) public view returns (Question memory) {
         require(questions[questionId].asker != address(0), "Question does not exist");
         return questions[questionId];
+    }
+
+    function getAnswersByQuestionId(
+        uint256 questionId, 
+        uint256 pageIndex, 
+        uint256 pageSize
+    ) public view returns (
+        Answer[] memory answersList, 
+        uint256 totalAnswers, 
+        uint256 totalPages
+    ) {
+        // Kiểm tra câu hỏi tồn tại
+        require(questions[questionId].asker != address(0), "Question does not exist");
+        
+        // Kiểm tra tính hợp lệ của phân trang
+        require(pageIndex > 0, "Page index must start from 1");
+        require(pageSize > 0, "Page size must be greater than 0");
+
+        // Đếm tổng số câu trả lời cho câu hỏi này
+        uint256 answersCount = 0;
+        for (uint256 i = 1; i < answerIdCounter; i++) {
+            if (answers[questionId][i].responder != address(0)) {
+                answersCount++;
+            }
+        }
+
+        totalAnswers = answersCount;
+
+        // Trường hợp không có câu trả lời
+        if (totalAnswers == 0) {
+            return (new Answer[](0), 0, 0);
+        }
+
+        // Tính tổng số trang
+        totalPages = (totalAnswers + pageSize - 1) / pageSize;
+
+        // Kiểm tra tính hợp lệ của chỉ mục trang
+        require(pageIndex <= totalPages, "Invalid page index");
+
+        // Tính toán phạm vi câu trả lời cho trang hiện tại
+        uint256 startIndex = (pageIndex - 1) * pageSize + 1;
+        uint256 endIndex = startIndex + pageSize - 1;
+
+        // Điều chỉnh endIndex nếu vượt quá số lượng câu trả lời
+        if (endIndex > answerIdCounter - 1) {
+            endIndex = answerIdCounter - 1;
+        }
+
+        // Tạo mảng lưu kết quả
+        uint256 resultSize = 0;
+        for (uint256 i = startIndex; i <= endIndex; i++) {
+            if (answers[questionId][i].responder != address(0)) {
+                resultSize++;
+            }
+        }
+
+        answersList = new Answer[](resultSize);
+        uint256 index = 0;
+
+        // Điền dữ liệu vào mảng kết quả
+        for (uint256 i = startIndex; i <= endIndex; i++) {
+            if (answers[questionId][i].responder != address(0)) {
+                answersList[index] = answers[questionId][i];
+                index++;
+            }
+        }
+
+        return (answersList, totalAnswers, totalPages);
     }
 
     function getAnswerById(uint256 questionId, uint256 answerId) public view returns (Answer memory) {
