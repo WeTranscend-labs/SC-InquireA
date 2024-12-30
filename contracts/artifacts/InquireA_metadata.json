@@ -771,7 +771,7 @@
 				],
 				"name": "voteForAnswer",
 				"outputs": [],
-				"stateMutability": "payable",
+				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
@@ -810,11 +810,11 @@
 	},
 	"sources": {
 		"contracts/InquireA.sol": {
-			"keccak256": "0x2aa5172a6b81e6c588e80f11f6ba72c8ebdd1458686f65d07bf5d7cfcae458eb",
+			"keccak256": "0x7597010ca6856c9e2d3a83eb22065f342561fa9eb2ae6eb0c199db20cd05a65b",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://fad2e22e2bf3970fedee18bc8e528ff6d721ce5063a353fb90b52baa3a7bb652",
-				"dweb:/ipfs/Qmc1cbjFyBsVyw4MYjRJwcuR3ENAChgJiwz7bniNJwW59o"
+				"bzz-raw://18d8f65e3486ac2cb116a1cd9ca93fae71584160a74177b114a422d674edeadc",
+				"dweb:/ipfs/QmeYNciNxCPVyu4ZSBToRMGk5UMQL6Hk2ioNs2fwRC7Hqn"
 			]
 		}
 	},

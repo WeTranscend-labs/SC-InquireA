@@ -275,18 +275,20 @@ contract InquireA {
         return answers[questionId][answerId];
     }
 
-    function voteForAnswer(uint256 questionId, uint256 answerId) public payable questionExists(questionId) notClosed(questionId) {
+    function voteForAnswer(uint256 questionId, uint256 answerId) 
+        public 
+        questionExists(questionId) 
+        notClosed(questionId) 
+    {
         Question memory question = questions[questionId];
         require(block.timestamp <= question.deadline, "Voting period has ended");
 
-        require(msg.value == voteFee, "Incorrect vote fee");
-
         Answer storage answer = answers[questionId][answerId];
         answer.upvotes += 1;
-        questions[questionId].rewardAmount += msg.value;
 
         emit Voted(questionId, answerId, msg.sender);
     }
+
 
     function closeQuestion(uint256 questionId, uint256 answerId) public questionExists(questionId) notClosed(questionId) {
         Question storage question = questions[questionId];
