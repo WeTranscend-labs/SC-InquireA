@@ -1,101 +1,41 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract InquireA {
-    address public owner;
-    uint256 public voteFee = 0.01 ether;
-    uint256 public questionIdCounter;
-    uint256 public answerIdCounter;
-    uint256 public constant WEEK = 7 days;
-    uint256 public constant TWO_WEEKS = 14 days;
-    uint256 public constant MONTH = 30 days;
+import "./InquireType.sol";
+import "./InquireEvent.sol";
+import "./InquireModifier.sol";
+import "./InquireConstants.sol";
+import "./InquireState.sol";
 
-    enum DeadlinePeriod {
-        OneWeek,
-        TwoWeeks,
-        OneMonth
-    }
-
-    struct Question {
-        uint256 id; // Thêm trường id vào đây
-        address asker;
-        string questionText;
-        string questionContent;
-        string category;
-        uint256 rewardAmount;
-        uint256 createdAt;
-        uint256 deadline;
-        bool isClosed;
-        uint256 chosenAnswerId;
-    }
-
-    struct Answer {
-        uint256 id;  // Thêm trường id
-        address responder;
-        string answerText;
-        uint256 upvotes;
-        uint256 rewardAmount;
-        uint256 createdAt;
-    }
-
-    mapping(uint256 => Question) public questions;
-    mapping(uint256 => mapping(uint256 => Answer)) public answers;
+contract InquireA is InquireEvent, InquireModifier, InquireState {
+    mapping(uint256 => mapping(uint256 => InquireType.Answer)) public answers;
     mapping(address => uint256) public balances;
-
-    event QuestionAsked(
-        uint256 questionId, 
-        address indexed asker, 
-        string questionText, 
-        uint256 rewardAmount,
-        string category
-    );
-    event AnswerSubmitted(uint256 questionId, uint256 answerId, address indexed responder, string answerText);
-    event Voted(uint256 questionId, uint256 answerId, address indexed voter);
-    event QuestionClosed(uint256 questionId, uint256 chosenAnswerId);
 
     constructor() {
         owner = msg.sender;
-        questionIdCounter = 1;  
-        answerIdCounter = 1;  
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only owner can execute this");
-        _;
-    }
-
-    modifier questionExists(uint256 questionId) {
-        require(questions[questionId].asker != address(0), "Question does not exist");
-        _;
-    }
-
-    modifier notClosed(uint256 questionId) {
-        require(!questions[questionId].isClosed, "Question is already closed");
-        _;
-    }
-
-    // Đặt câu hỏi với category là string
     function askQuestion(
         string memory _questionText,
         string memory _questionContent, 
         string memory _category,
-        DeadlinePeriod _deadlinePeriod
-    ) public payable {
+        InquireType.DeadlinePeriod _deadlinePeriod
+    ) public override payable {
         require(msg.value > 0, "Reward must be greater than zero");
         require(bytes(_category).length > 0, "Category cannot be empty");
 
         uint256 deadline;
-        if (_deadlinePeriod == DeadlinePeriod.OneWeek) {
-            deadline = block.timestamp + WEEK;
-        } else if (_deadlinePeriod == DeadlinePeriod.TwoWeeks) {
-            deadline = block.timestamp + TWO_WEEKS;
-        } else if (_deadlinePeriod == DeadlinePeriod.OneMonth) {
-            deadline = block.timestamp + MONTH;
+        if (_deadlinePeriod == InquireType.DeadlinePeriod.OneWeek) {
+            deadline = block.timestamp + InquireConstants.WEEK;
+        } else if (_deadlinePeriod == InquireType.DeadlinePeriod.TwoWeeks) {
+            deadline = block.timestamp + InquireConstants.TWO_WEEKS;
+        } else if (_deadlinePeriod == InquireType.DeadlinePeriod.OneMonth) {
+            deadline = block.timestamp + InquireConstants.MONTH;
         }
         
         uint256 questionId = questionIdCounter++;
-        questions[questionId] = Question({
-            id: questionId, // Gán id vào cấu trúc câu hỏi
+        questions[questionId] = InquireType.Question({
+            id: questionId,
             asker: msg.sender,
             questionText: _questionText,
             questionContent: _questionContent, 
@@ -110,14 +50,18 @@ contract InquireA {
         emit QuestionAsked(questionId, msg.sender, _questionText, msg.value, _category);
     }
 
-    // Trả lời câu hỏi
-    function submitAnswer(uint256 questionId, string memory _answerText) public questionExists(questionId) notClosed(questionId) {
-        Question memory question = questions[questionId];
+    function submitAnswer(uint256 questionId, string memory _answerText) 
+        public 
+        override 
+        questionExists(questionId)
+        notClosed(questionId) 
+    {
+        InquireType.Question memory question = questions[questionId];
         require(block.timestamp <= question.deadline, "Question deadline has passed");
 
         uint256 answerId = answerIdCounter++;
-        answers[questionId][answerId] = Answer({
-            id: answerId,  // Thêm id khi tạo answer
+        answers[questionId][answerId] = InquireType.Answer({
+            id: answerId,
             responder: msg.sender,
             answerText: _answerText,
             upvotes: 0,
@@ -128,12 +72,12 @@ contract InquireA {
         emit AnswerSubmitted(questionId, answerId, msg.sender, _answerText);
     }
 
-    // Lấy câu hỏi theo chỉ mục (pagination)
     function getQuestions(uint256 pageIndex, uint256 pageSize) 
         public 
         view 
+        override 
         returns (
-            Question[] memory questionsList, 
+            InquireType.Question[] memory questionsList, 
             uint256 totalQuestions, 
             uint256 totalPages
         ) 
@@ -143,14 +87,12 @@ contract InquireA {
 
         totalQuestions = questionIdCounter - 1;
 
-        // Trường hợp không có câu hỏi nào
         if (totalQuestions == 0) {
-            return (new Question[](0), 0, 0);
+            return (new InquireType.Question[](0), 0, 0);
         }
 
         totalPages = (totalQuestions + pageSize - 1) / pageSize;
 
-        // Kiểm tra nếu pageIndex không hợp lệ
         require(pageIndex <= totalPages, "Invalid page index");
 
         uint256 startIndex = (pageIndex - 1) * pageSize + 1;
@@ -161,7 +103,7 @@ contract InquireA {
         }
 
         uint256 resultSize = endIndex - startIndex + 1;
-        questionsList = new Question[](resultSize);
+        questionsList = new InquireType.Question[](resultSize);
 
         uint256 index = 0;
         for (uint256 i = startIndex; i <= endIndex; i++) {
@@ -172,22 +114,20 @@ contract InquireA {
         return (questionsList, totalQuestions, totalPages);
     }
 
-    function selectBestAnswer(uint256 questionId, uint256 answerId) public payable {
-        require(questions[questionId].asker != address(0), "Question does not exist");
-        
+    function selectBestAnswer(uint256 questionId, uint256 answerId) 
+        public 
+        override 
+        payable 
+        questionExists(questionId)
+        notClosed(questionId) 
+    {
         require(msg.sender == questions[questionId].asker, "Only question asker can select the best answer");
-        
         require(answers[questionId][answerId].responder != address(0), "Answer does not exist");
-        
-        require(!questions[questionId].isClosed, "Question is already closed");
-        
-        // require(block.timestamp > questions[questionId].deadline, "Cannot select answer before deadline");
 
         questions[questionId].isClosed = true;
         questions[questionId].chosenAnswerId = answerId;
 
         address bestResponder = answers[questionId][answerId].responder;
-        
         uint256 totalReward = questions[questionId].rewardAmount;
 
         answers[questionId][answerId].rewardAmount = totalReward;
@@ -197,7 +137,12 @@ contract InquireA {
         emit QuestionClosed(questionId, answerId);
     }
 
-    function getQuestionById(uint256 questionId) public view returns (Question memory) {
+    function getQuestionById(uint256 questionId) 
+        public 
+        view 
+        override 
+        returns (InquireType.Question memory) 
+    {
         require(questions[questionId].asker != address(0), "Question does not exist");
         return questions[questionId];
     }
@@ -206,19 +151,15 @@ contract InquireA {
         uint256 questionId, 
         uint256 pageIndex, 
         uint256 pageSize
-    ) public view returns (
-        Answer[] memory answersList, 
+    ) public view override returns (
+        InquireType.Answer[] memory answersList, 
         uint256 totalAnswers, 
         uint256 totalPages
     ) {
-        // Kiểm tra câu hỏi tồn tại
         require(questions[questionId].asker != address(0), "Question does not exist");
-        
-        // Kiểm tra tính hợp lệ của phân trang
         require(pageIndex > 0, "Page index must start from 1");
         require(pageSize > 0, "Page size must be greater than 0");
 
-        // Đếm tổng số câu trả lời cho câu hỏi này
         uint256 answersCount = 0;
         for (uint256 i = 1; i < answerIdCounter; i++) {
             if (answers[questionId][i].responder != address(0)) {
@@ -228,27 +169,20 @@ contract InquireA {
 
         totalAnswers = answersCount;
 
-        // Trường hợp không có câu trả lời
         if (totalAnswers == 0) {
-            return (new Answer[](0), 0, 0);
+            return (new InquireType.Answer[](0), 0, 0);
         }
 
-        // Tính tổng số trang
         totalPages = (totalAnswers + pageSize - 1) / pageSize;
-
-        // Kiểm tra tính hợp lệ của chỉ mục trang
         require(pageIndex <= totalPages, "Invalid page index");
 
-        // Tính toán phạm vi câu trả lời cho trang hiện tại
         uint256 startIndex = (pageIndex - 1) * pageSize + 1;
         uint256 endIndex = startIndex + pageSize - 1;
 
-        // Điều chỉnh endIndex nếu vượt quá số lượng câu trả lời
         if (endIndex > answerIdCounter - 1) {
             endIndex = answerIdCounter - 1;
         }
 
-        // Tạo mảng lưu kết quả
         uint256 resultSize = 0;
         for (uint256 i = startIndex; i <= endIndex; i++) {
             if (answers[questionId][i].responder != address(0)) {
@@ -256,10 +190,9 @@ contract InquireA {
             }
         }
 
-        answersList = new Answer[](resultSize);
+        answersList = new InquireType.Answer[](resultSize);
         uint256 index = 0;
 
-        // Điền dữ liệu vào mảng kết quả
         for (uint256 i = startIndex; i <= endIndex; i++) {
             if (answers[questionId][i].responder != address(0)) {
                 answersList[index] = answers[questionId][i];
@@ -270,28 +203,38 @@ contract InquireA {
         return (answersList, totalAnswers, totalPages);
     }
 
-    function getAnswerById(uint256 questionId, uint256 answerId) public view returns (Answer memory) {
+    function getAnswerById(uint256 questionId, uint256 answerId) 
+        public 
+        view 
+        override 
+        returns (InquireType.Answer memory) 
+    {
         require(answers[questionId][answerId].responder != address(0), "Answer does not exist");
         return answers[questionId][answerId];
     }
 
     function voteForAnswer(uint256 questionId, uint256 answerId) 
         public 
-        questionExists(questionId) 
+        override 
+        questionExists(questionId)
         notClosed(questionId) 
     {
-        Question memory question = questions[questionId];
+        InquireType.Question memory question = questions[questionId];
         require(block.timestamp <= question.deadline, "Voting period has ended");
 
-        Answer storage answer = answers[questionId][answerId];
+        InquireType.Answer storage answer = answers[questionId][answerId];
         answer.upvotes += 1;
 
         emit Voted(questionId, answerId, msg.sender);
     }
 
-
-    function closeQuestion(uint256 questionId, uint256 answerId) public questionExists(questionId) notClosed(questionId) {
-        Question storage question = questions[questionId];
+    function closeQuestion(uint256 questionId, uint256 answerId) 
+        public 
+        override 
+        questionExists(questionId)
+        notClosed(questionId) 
+    {
+        InquireType.Question storage question = questions[questionId];
         require(msg.sender == question.asker, "Only asker can close question");
 
         question.isClosed = true;
@@ -300,23 +243,24 @@ contract InquireA {
         emit QuestionClosed(questionId, answerId);
     }
 
-    // Phân phối phần thưởng
-    function distributeRewards(uint256 questionId) public questionExists(questionId) {
-        Question storage question = questions[questionId];
+    function distributeRewards(uint256 questionId) 
+        public 
+        override 
+        questionExists(questionId) 
+    {
+        InquireType.Question storage question = questions[questionId];
         require(block.timestamp > question.deadline, "Cannot distribute before deadline");
         require(!question.isClosed, "Question is already closed");
 
         uint256 totalUpvotes = 0;
         uint256 totalReward = question.rewardAmount;
 
-        // Tính tổng upvote
         for (uint256 i = 0; i < answerIdCounter; i++) {
             totalUpvotes += answers[questionId][i].upvotes;
         }
 
-        // Chia phần thưởng
         for (uint256 i = 0; i < answerIdCounter; i++) {
-            Answer storage answer = answers[questionId][i];
+            InquireType.Answer storage answer = answers[questionId][i];
             if (totalUpvotes > 0) {
                 uint256 reward = (answer.upvotes * totalReward) / totalUpvotes;
                 answer.rewardAmount += reward;
@@ -327,7 +271,11 @@ contract InquireA {
         question.isClosed = true;
     }
 
-    function withdraw() public {
+    function withdraw() 
+        public 
+        override 
+        onlyOwner 
+    {
         uint256 amount = balances[msg.sender];
         require(amount > 0, "No funds to withdraw");
 
@@ -335,12 +283,16 @@ contract InquireA {
         payable(msg.sender).transfer(amount);
     }
 
-    function balance() public view returns (uint256) {
+    function balance() public view override returns (uint256) {
         return address(this).balance;
     }
 
-    // Truy vấn câu hỏi theo category
-    function getQuestionsByCategory(string memory _category) public view returns (uint256[] memory) {
+    function getQuestionsByCategory(string memory _category) 
+        public 
+        view 
+        override 
+        returns (uint256[] memory) 
+    {
         uint256[] memory matchedQuestions = new uint256[](questionIdCounter);
         uint256 count = 0;
 
@@ -351,7 +303,6 @@ contract InquireA {
             }
         }
 
-        // Resize mảng
         uint256[] memory result = new uint256[](count);
         for (uint256 i = 0; i < count; i++) {
             result[i] = matchedQuestions[i];
