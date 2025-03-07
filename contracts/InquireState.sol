@@ -9,20 +9,25 @@ abstract contract InquireState {
     uint256 public questionIdCounter;
     uint256 public answerIdCounter;
 
+    mapping(uint256 => mapping(uint256 => InquireType.Answer)) public answers;
+    mapping(address => uint256) public balances;
+    mapping(address => InquireType.User) public users;
+
+    address[] public userAddresses;
+    mapping(address => bool) public isUserRegistered;
+    
+
     constructor() {
         questionIdCounter = 1;
         answerIdCounter = 1;
     }
 
-    // Các phương thức trừu tượng yêu cầu triển khai
     function askQuestion(
-        string memory _questionText,
-        string memory _questionContent,
-        string memory _category,
+        string memory _questionDetailId, // Đổi thành string
         InquireType.DeadlinePeriod _deadlinePeriod
     ) public virtual payable;
 
-    function submitAnswer(uint256 questionId, string memory _answerText) 
+    function submitAnswer(uint256 questionId, string memory _answerDetailId) // Đổi thành string
         public virtual;
 
     function getQuestions(uint256 pageIndex, uint256 pageSize) 
@@ -64,6 +69,12 @@ abstract contract InquireState {
 
     function balance() public view virtual returns (uint256);
 
-    function getQuestionsByCategory(string memory _category) 
-        public view virtual returns (uint256[] memory);
+    function getUser(address user) public view virtual returns (InquireType.User memory);
+
+    function getUsers(uint256 pageIndex, uint256 pageSize) 
+        public view virtual returns (
+            InquireType.User[] memory usersList,
+            uint256 totalUsers,
+            uint256 totalPages
+        );
 }

@@ -1,28 +1,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-// Interface chứa các định nghĩa event cho contract InquireA
-interface InquireEvent {
+abstract contract InquireEvent {
     event QuestionAsked(
-        uint256 questionId, 
-        address indexed asker, 
-        string questionText, 
-        uint256 rewardAmount,
-        string category
+        uint256 indexed questionId,
+        address indexed asker,
+        string questionDetailId,
+        uint256 rewardAmount
     );
+
     event AnswerSubmitted(
-        uint256 questionId, 
-        uint256 answerId, 
-        address indexed responder, 
-        string answerText
+        uint256 indexed questionId,
+        uint256 indexed answerId,
+        address indexed responder,
+        string answerDetailId 
     );
+
     event Voted(
-        uint256 questionId, 
-        uint256 answerId, 
+        uint256 indexed questionId,
+        uint256 indexed answerId,
         address indexed voter
     );
-    event QuestionClosed(
-        uint256 questionId, 
-        uint256 chosenAnswerId
-    );
+
+    event QuestionClosed(uint256 indexed questionId, uint256 chosenAnswerId);
 }

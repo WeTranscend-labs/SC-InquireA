@@ -8,21 +8,33 @@ import "./InquireConstants.sol";
 import "./InquireState.sol";
 
 contract InquireA is InquireEvent, InquireModifier, InquireState {
-    mapping(uint256 => mapping(uint256 => InquireType.Answer)) public answers;
-    mapping(address => uint256) public balances;
 
     constructor() {
         owner = msg.sender;
     }
 
+function _increaseReputation(address user, uint256 amount) internal {
+    if (users[user].reputation == 0 && amount > 0) {
+        users[user] = InquireType.User({
+            userAddress: user,
+            reputation: 0,
+            answerCount: 0,
+            questionCount: 0,
+            bestSolutionCount: 0
+        });
+        if (!isUserRegistered[user]) { // Kiểm tra để tránh trùng lặp
+            userAddresses.push(user);
+            isUserRegistered[user] = true;
+        }
+    }
+    users[user].reputation += amount;
+}
+
     function askQuestion(
-        string memory _questionText,
-        string memory _questionContent, 
-        string memory _category,
+        string memory _questionDetailId, // Đổi thành string
         InquireType.DeadlinePeriod _deadlinePeriod
     ) public override payable {
         require(msg.value > 0, "Reward must be greater than zero");
-        require(bytes(_category).length > 0, "Category cannot be empty");
 
         uint256 deadline;
         if (_deadlinePeriod == InquireType.DeadlinePeriod.OneWeek) {
@@ -37,9 +49,7 @@ contract InquireA is InquireEvent, InquireModifier, InquireState {
         questions[questionId] = InquireType.Question({
             id: questionId,
             asker: msg.sender,
-            questionText: _questionText,
-            questionContent: _questionContent, 
-            category: _category,
+            questionDetailId: _questionDetailId,
             rewardAmount: msg.value,
             createdAt: block.timestamp,
             deadline: deadline,
@@ -47,10 +57,13 @@ contract InquireA is InquireEvent, InquireModifier, InquireState {
             chosenAnswerId: 0
         });
 
-        emit QuestionAsked(questionId, msg.sender, _questionText, msg.value, _category);
+        _increaseReputation(msg.sender, InquireConstants.REPUTATION_FOR_ASKING);
+        users[msg.sender].questionCount += 1;
+
+        emit QuestionAsked(questionId, msg.sender, _questionDetailId, msg.value);
     }
 
-    function submitAnswer(uint256 questionId, string memory _answerText) 
+    function submitAnswer(uint256 questionId, string memory _answerDetailId) // Đổi thành string
         public 
         override 
         questionExists(questionId)
@@ -63,15 +76,49 @@ contract InquireA is InquireEvent, InquireModifier, InquireState {
         answers[questionId][answerId] = InquireType.Answer({
             id: answerId,
             responder: msg.sender,
-            answerText: _answerText,
+            answerDetailId: _answerDetailId,
             upvotes: 0,
             rewardAmount: 0,
             createdAt: block.timestamp
         });
 
-        emit AnswerSubmitted(questionId, answerId, msg.sender, _answerText);
+        _increaseReputation(msg.sender, InquireConstants.REPUTATION_FOR_ANSWERING);
+        users[msg.sender].answerCount += 1;
+
+        emit AnswerSubmitted(questionId, answerId, msg.sender, _answerDetailId);
     }
 
+    function selectBestAnswer(uint256 questionId, uint256 answerId) 
+        public 
+        override 
+        payable 
+        questionExists(questionId)
+        notClosed(questionId) 
+    {
+        require(msg.sender == questions[questionId].asker, "Only question asker can select the best answer");
+        require(answers[questionId][answerId].responder != address(0), "Answer does not exist");
+
+        questions[questionId].isClosed = true;
+        questions[questionId].chosenAnswerId = answerId;
+
+        address bestResponder = answers[questionId][answerId].responder;
+        uint256 totalReward = questions[questionId].rewardAmount;
+
+        answers[questionId][answerId].rewardAmount = totalReward;
+
+        _increaseReputation(bestResponder, InquireConstants.REPUTATION_FOR_BEST_ANSWER);
+        users[bestResponder].bestSolutionCount += 1; 
+
+        payable(bestResponder).transfer(totalReward);
+
+        emit QuestionClosed(questionId, answerId);
+    }
+
+    function getUser(address user) public view override returns (InquireType.User memory) {
+        return users[user]; 
+    }
+
+    // Các hàm khác giữ nguyên
     function getQuestions(uint256 pageIndex, uint256 pageSize) 
         public 
         view 
@@ -112,29 +159,6 @@ contract InquireA is InquireEvent, InquireModifier, InquireState {
         }
 
         return (questionsList, totalQuestions, totalPages);
-    }
-
-    function selectBestAnswer(uint256 questionId, uint256 answerId) 
-        public 
-        override 
-        payable 
-        questionExists(questionId)
-        notClosed(questionId) 
-    {
-        require(msg.sender == questions[questionId].asker, "Only question asker can select the best answer");
-        require(answers[questionId][answerId].responder != address(0), "Answer does not exist");
-
-        questions[questionId].isClosed = true;
-        questions[questionId].chosenAnswerId = answerId;
-
-        address bestResponder = answers[questionId][answerId].responder;
-        uint256 totalReward = questions[questionId].rewardAmount;
-
-        answers[questionId][answerId].rewardAmount = totalReward;
-
-        payable(bestResponder).transfer(totalReward);
-
-        emit QuestionClosed(questionId, answerId);
     }
 
     function getQuestionById(uint256 questionId) 
@@ -287,27 +311,45 @@ contract InquireA is InquireEvent, InquireModifier, InquireState {
         return address(this).balance;
     }
 
-    function getQuestionsByCategory(string memory _category) 
-        public 
-        view 
-        override 
-        returns (uint256[] memory) 
-    {
-        uint256[] memory matchedQuestions = new uint256[](questionIdCounter);
-        uint256 count = 0;
+function getUsers(uint256 pageIndex, uint256 pageSize) 
+    public 
+    view 
+    override 
+    returns (
+        InquireType.User[] memory usersList, 
+        uint256 totalUsers, 
+        uint256 totalPages
+    ) 
+{
+    require(pageIndex > 0, "Page index must start from 1");
+    require(pageSize > 0, "Page size must be greater than 0");
 
-        for (uint256 i = 1; i < questionIdCounter; i++) {
-            if (keccak256(bytes(questions[i].category)) == keccak256(bytes(_category))) {
-                matchedQuestions[count] = i;
-                count++;
-            }
-        }
+    totalUsers = userAddresses.length;
 
-        uint256[] memory result = new uint256[](count);
-        for (uint256 i = 0; i < count; i++) {
-            result[i] = matchedQuestions[i];
-        }
-
-        return result;
+    if (totalUsers == 0) {
+        return (new InquireType.User[](0), 0, 0);
     }
+
+    totalPages = (totalUsers + pageSize - 1) / pageSize;
+
+    require(pageIndex <= totalPages, "Invalid page index");
+
+    uint256 startIndex = (pageIndex - 1) * pageSize;
+    uint256 endIndex = startIndex + pageSize - 1;
+
+    if (endIndex >= totalUsers) {
+        endIndex = totalUsers - 1;
+    }
+
+    uint256 resultSize = endIndex - startIndex + 1;
+    usersList = new InquireType.User[](resultSize);
+
+    uint256 index = 0;
+    for (uint256 i = startIndex; i <= endIndex; i++) {
+        usersList[index] = users[userAddresses[i]];
+        index++;
+    }
+
+    return (usersList, totalUsers, totalPages);
+}
 }
