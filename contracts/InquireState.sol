@@ -10,6 +10,7 @@ abstract contract InquireState {
     uint256 public answerIdCounter;
 
     mapping(uint256 => mapping(uint256 => InquireType.Answer)) public answers;
+    mapping(uint256 => mapping(uint256 => uint256[])) public answerReplies; // questionId => answerId => danh sách answer cấp 2
     mapping(address => uint256) public balances;
     mapping(address => InquireType.User) public users;
 
@@ -22,12 +23,10 @@ abstract contract InquireState {
         answerIdCounter = 1;
     }
 
-    function askQuestion(
-        string memory _questionDetailId, // Đổi thành string
-        InquireType.DeadlinePeriod _deadlinePeriod
-    ) public virtual payable;
+    function askQuestion(string memory _questionDetailId, InquireType.DeadlinePeriod _deadlinePeriod) 
+        public virtual payable;
 
-    function submitAnswer(uint256 questionId, string memory _answerDetailId) // Đổi thành string
+    function submitAnswer(uint256 questionId, string memory _answerDetailId, uint256 parentAnswerId) 
         public virtual;
 
     function getQuestions(uint256 pageIndex, uint256 pageSize) 

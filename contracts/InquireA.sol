@@ -22,7 +22,7 @@ function _increaseReputation(address user, uint256 amount) internal {
             questionCount: 0,
             bestSolutionCount: 0
         });
-        if (!isUserRegistered[user]) { // Kiểm tra để tránh trùng lặp
+        if (!isUserRegistered[user]) { 
             userAddresses.push(user);
             isUserRegistered[user] = true;
         }
@@ -31,7 +31,7 @@ function _increaseReputation(address user, uint256 amount) internal {
 }
 
     function askQuestion(
-        string memory _questionDetailId, // Đổi thành string
+        string memory _questionDetailId,
         InquireType.DeadlinePeriod _deadlinePeriod
     ) public override payable {
         require(msg.value > 0, "Reward must be greater than zero");
@@ -63,7 +63,11 @@ function _increaseReputation(address user, uint256 amount) internal {
         emit QuestionAsked(questionId, msg.sender, _questionDetailId, msg.value);
     }
 
-    function submitAnswer(uint256 questionId, string memory _answerDetailId) // Đổi thành string
+    function submitAnswer(
+        uint256 questionId, 
+        string memory _answerDetailId, 
+        uint256 parentAnswerId
+    ) 
         public 
         override 
         questionExists(questionId)
@@ -72,6 +76,11 @@ function _increaseReputation(address user, uint256 amount) internal {
         InquireType.Question memory question = questions[questionId];
         require(block.timestamp <= question.deadline, "Question deadline has passed");
 
+        if (parentAnswerId != 0) {
+            require(answers[questionId][parentAnswerId].responder != address(0), "Parent answer does not exist");
+            require(answers[questionId][parentAnswerId].parentAnswerId == 0, "Can only reply to top-level answers");
+        }
+
         uint256 answerId = answerIdCounter++;
         answers[questionId][answerId] = InquireType.Answer({
             id: answerId,
@@ -79,13 +88,64 @@ function _increaseReputation(address user, uint256 amount) internal {
             answerDetailId: _answerDetailId,
             upvotes: 0,
             rewardAmount: 0,
-            createdAt: block.timestamp
+            createdAt: block.timestamp,
+            questionId: questionId,
+            parentAnswerId: parentAnswerId
         });
+
+        if (parentAnswerId != 0) {
+            answerReplies[questionId][parentAnswerId].push(answerId);
+        }
 
         _increaseReputation(msg.sender, InquireConstants.REPUTATION_FOR_ANSWERING);
         users[msg.sender].answerCount += 1;
 
         emit AnswerSubmitted(questionId, answerId, msg.sender, _answerDetailId);
+    }
+
+    function getRepliesByAnswerId(
+        uint256 questionId,
+        uint256 answerId,
+        uint256 pageIndex,
+        uint256 pageSize
+    ) 
+        public 
+        view 
+        returns (
+            InquireType.Answer[] memory repliesList,
+            uint256 totalReplies,
+            uint256 totalPages
+        ) 
+    {
+        require(answers[questionId][answerId].responder != address(0), "Answer does not exist");
+        require(answers[questionId][answerId].parentAnswerId == 0, "Only top-level answers have replies");
+        require(pageIndex > 0, "Page index must start from 1");
+        require(pageSize > 0, "Page size must be greater than 0");
+
+        uint256[] memory replyIds = answerReplies[questionId][answerId];
+        totalReplies = replyIds.length;
+
+        if (totalReplies == 0) {
+            return (new InquireType.Answer[](0), 0, 0);
+        }
+
+        totalPages = (totalReplies + pageSize - 1) / pageSize;
+        require(pageIndex <= totalPages, "Invalid page index");
+
+        uint256 startIndex = (pageIndex - 1) * pageSize;
+        uint256 endIndex = startIndex + pageSize - 1;
+        if (endIndex >= totalReplies) {
+            endIndex = totalReplies - 1;
+        }
+
+        uint256 resultSize = endIndex - startIndex + 1;
+        repliesList = new InquireType.Answer[](resultSize);
+
+        for (uint256 i = 0; i < resultSize; i++) {
+            repliesList[i] = answers[questionId][replyIds[startIndex + i]];
+        }
+
+        return (repliesList, totalReplies, totalPages);
     }
 
     function selectBestAnswer(uint256 questionId, uint256 answerId) 
@@ -184,9 +244,11 @@ function _increaseReputation(address user, uint256 amount) internal {
         require(pageIndex > 0, "Page index must start from 1");
         require(pageSize > 0, "Page size must be greater than 0");
 
+        // Đếm số Answer cấp 1
         uint256 answersCount = 0;
         for (uint256 i = 1; i < answerIdCounter; i++) {
-            if (answers[questionId][i].responder != address(0)) {
+            if (answers[questionId][i].responder != address(0) && 
+                answers[questionId][i].parentAnswerId == 0) { // Chỉ lấy cấp 1
                 answersCount++;
             }
         }
@@ -207,9 +269,11 @@ function _increaseReputation(address user, uint256 amount) internal {
             endIndex = answerIdCounter - 1;
         }
 
+        // Đếm số Answer cấp 1 trong phạm vi phân trang
         uint256 resultSize = 0;
         for (uint256 i = startIndex; i <= endIndex; i++) {
-            if (answers[questionId][i].responder != address(0)) {
+            if (answers[questionId][i].responder != address(0) && 
+                answers[questionId][i].parentAnswerId == 0) { // Chỉ lấy cấp 1
                 resultSize++;
             }
         }
@@ -217,8 +281,10 @@ function _increaseReputation(address user, uint256 amount) internal {
         answersList = new InquireType.Answer[](resultSize);
         uint256 index = 0;
 
+        // Lấy Answer cấp 1 vào danh sách
         for (uint256 i = startIndex; i <= endIndex; i++) {
-            if (answers[questionId][i].responder != address(0)) {
+            if (answers[questionId][i].responder != address(0) && 
+                answers[questionId][i].parentAnswerId == 0) { // Chỉ lấy cấp 1
                 answersList[index] = answers[questionId][i];
                 index++;
             }
