@@ -1,94 +1,164 @@
-# InquireA
+
+# InquireA - Smart Contracts
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com/WeTranscend-labs/FE-Realm-of-Cards/actions) [![Version](https://img.shields.io/badge/Version-1.0.0-orange.svg)](https://github.com/WeTranscend-labs/FE-Realm-of-Cards/releases) [![HappyChain](https://img.shields.io/badge/Blockchain-HappyChain-yellow.svg)](https://happy-testnet-sepolia.hub.caldera.xyz/)
+
+  
+
+Welcome to the core of **InquireA**! This repository contains the smart contracts that power the platform’s blockchain integration, ensuring secure reward distribution, tamper-proof reputation tracking, and efficient dispute resolution on the **Ancient8 Chain**. Whether you're asking questions or earning rewards for answers, these contracts are the magical glue holding this decentralized Q&A ecosystem together. Let’s dive into the blockchain brilliance within! 🧠💰
+
+----------
 
 ## Table of Contents
-- [Project Overview](#project-overview)
-- [Features](#features)
-- [Deployment](#deployment)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Technologies Used](#technologies-used)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
 
-## Project Overview
-InquireA is a decentralized Q&A platform built on blockchain technology to enhance transparency, encourage user participation, and incentivize high-quality content. By integrating smart contracts and a reputation system, InquireA aims to solve common issues in traditional Q&A platforms, such as lack of motivation, spam, and low-quality answers.
+-   [What is InquireA - Smart Contracts?](#what-is-inquirea---smart-contracts)
+-   [How to Get Started](#how-to-get-started)
+    -   [Installation](#installation)
+-   [Technologies Powering the Contracts](#technologies-powering-the-contracts)
+-   [Project Structure](#project-structure)
+-   [How to Contribute](#how-to-contribute)
+-   [License](#license)
 
-## Features
-- **Auto Select Answer**: Automatically selects the highest-upvoted answer after a set time limit.
-- **Reward for Choosing**: Rewards users for selecting the best answer within the given timeframe.
-- **Proportional Reward**: Distributes rewards based on the number of upvotes each answer receives.
-- **Arbitration System (DAO)**: Resolves disputes through a decentralized arbitration system.
-- **Minimum Question Fee**: Implements a minimum posting fee to reduce spam and encourage quality.
-- **Reputation System**: Tracks user reputation on the blockchain, offering reduced fees and increased trust.
-- **Smart Contract Rewarding**: Ensures transparent and automatic reward distribution.
-- **Decentralized Content Storage**: Secures content on the blockchain to prevent unauthorized changes.
+  
 
-## Deployment
+----------
 
-The InquireA platform is live and can be accessed at:
 
-**Deployment Link**: [https://inquire-a.vercel.app](https://inquire-a.vercel.app)
+## What is InquireA - Smart Contracts?
 
-You can explore the platform, post questions, answer queries, and interact with other users in a decentralized environment, all powered by blockchain technology.
+**InquireA - Smart Contracts** forms the blockchain foundation of this decentralized Q&A platform. These contracts:
 
-## Getting Started
-Follow the steps below to set up the project locally.
+-   Manage **question posting** with minimum fees to deter spam and ensure quality.
+-   Handle **proportional reward distribution** based on upvotes for answers.
+-   Track **user reputation** on-chain, unlocking benefits like reduced fees.
+-   Enable a **DAO-based arbitration system** for fair dispute resolution.
 
-### Prerequisites
-- Node.js (v16 or later)
-- npm or yarn
-- Blockchain wallet (e.g., MetaMask)
+Built for seamless integration with the backend and frontend, these contracts bring InquireA to life with decentralized transparency. Ready to explore the code that powers this knowledge revolution? 🧙‍♂️
+
+----------
+
+
+## How to Get Started
+
+Ready to deploy these contracts and unleash the blockchain magic? Follow these steps to set up and interact with the smart contracts locally or on the **Ancient8 Chain**!
 
 ### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Quantaphocpython/_InquireA.git
-   cd _InquireA
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Configure environment variables:
-   - Create a `.env` file in the root directory.
-   - Add the following variables:
-     ```env
-     NEXT_PUBLIC_APP_NAME=YourAppName
-	 NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your-wallet-connect-project-id
-	 NEXT_PUBLIC_NETWORK_URL=https://your-network-url
-	 NEXT_PUBLIC_NETWORK_RPC_INFURA_KEY=your-infura-rpc-key
-	 NEXT_PUBLIC_CONTRACT_ADDRESS=your-contract-address
-	 NEXT_PUBLIC_TINYMCE_API_KEY=your-tinymce-api-key
-     ```
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
 
-## Technologies Used
-- **Frontend**: Next.js, TypeScript, Tailwind CSS
-- **Smart Contracts Language**: Solidity
-- **Blockchain Interaction**: Ethers.js, Wagmi, Viem
-- **Text Editor**: TinyMCE React
-- **Others**: React Hook Form, React Query, Zod
+To get started with **InquireA - Smart Contracts**, follow these steps to clone the repository and deploy using **Remix IDE**. This guide assumes you are working with the InquireA repository on GitHub and deploying to the **Ancient8 Chain**.
+
+#### 1. **Prepare Your Environment**
+
+-   **Access Remix IDE**: Open your browser and navigate to [Remix IDE](https://remix.ethereum.org/).
+-   **Set Up MetaMask**:
+    -   Install the MetaMask extension if you don’t already have it.
+    -   Add the **Ancient8 Testnet Chain** network to MetaMask via [Overview of Ancient8 Chain | Ancient8 Documentation](https://docs.ancient8.gg/).
+    -   Get testnet tokens from the Ancient8 faucet (check [Faucet | Ancient8 Documentation](https://docs.ancient8.gg/using-ancient8-chain/faucet) for faucet details) to cover gas fees.
+
+#### 2. **Clone the Repository into Remix IDE**
+
+Remix IDE supports cloning GitHub repositories directly into its workspace. Here’s how:
+
+-   **Open File Explorer**:
+    -   On the left sidebar, click the **File Explorer** icon (looks like a folder).
+    -   If it’s not visible, activate it via **Plugin Manager** (plug icon) > Search for "File Explorer" > Activate.
+-   **Clone the Repository**:
+    -   In **File Explorer**, click the **Clone Git Repository** icon (a down arrow or Git symbol).
+    -   Paste the following URL:
+	     ```
+	    https://github.com/WeTranscend-labs/SC-InquireAv2.git
+	    ```
+    -   Click **OK** to import the repository into your workspace.
+
+-   **Verify the Files**:  
+    -   Ensure key folders like contracts/, scripts/, and test/ are loaded.
+      
+    -   Open the main contract file contracts/InquireA.sol, to inspect the code.
+      
+
+
+#### 3. **Compile the Smart Contract**
+
+Before deployment, compile the contract to check for errors.
+
+-   **Select the Contract**:
+    -   Double-click a contract file (InquireA.sol) in **File Explorer**.
+-   **Open the Compiler**:
+    -   Click the **Solidity Compiler** icon (an "S") on the left sidebar.
+-   **Configure and Compile**:
+    -   Set the Solidity version to match the pragma solidity line in your contract (e.g., 0.8.0).
+    -   Click **Compile InquireA.sol** or enable **Auto compile**.
+-   **Check the Output**:
+    -   A green checkmark means it compiled successfully.
+
+#### 4. **Deploy the Smart Contract on Ancient8 Testnet Chain**
+
+Now, deploy your contract using Remix and MetaMask.
+
+-   **Open the Deploy Tab**:
+    -   Click the **Deploy & Run Transactions** icon (down arrow) on the left sidebar.
+-   **Connect MetaMask**:
+    -   In the **Environment** dropdown, select **Injected Provider - MetaMask**.
+    -   Approve the connection in MetaMask and ensure you’re on **Ancient8 Testnet Chain**.
+-   **Deploy the Contract**:
+    -   From the **Contract** dropdown, select the main contract (InquireA.sol).
+    -   Click **Deploy** and confirm the transaction in MetaMask.
+-   **Get the Contract Address**:
+    -   Once deployed, the contract address will appear under **Deployed Contracts**.
+
+#### 5. **Interact with the Deployed Contract**
+
+Test and interact with your contract directly in Remix.
+
+-   **Access Functions**:
+    -   Expand the contract under **Deployed Contracts** to see its functions.
+-   **Call Functions**:
+    -   For **view** functions (e.g., getQuestions), input parameters and click to see the output.
+    -   For **write** functions (e.g., askQuestion), input parameters, click, and confirm the transaction in MetaMask.
+-   **Example**:
+    -   To post a question, call askQuestion with a fee and confirm the transaction.
+
+#### 6. **Important Notes**:
+
+-   **Gas Fees**: Ensure you have enough testnet tokens in your MetaMask wallet.
+-   **Network Check**: Verify Remix and MetaMask are both on **Ancient8 testnet Chain**.
+-   **Troubleshooting**:
+    -   _“Nonce too high”_: Reset your MetaMask account (Settings > Advanced > Reset Account).
+    -   _“Compilation failed”_: Check the Solidity version or fix syntax errors in the code.
+
+----------
+
+
+## Technologies Powering the Contracts
+
+These smart contracts are built with a robust stack of tools to ensure security, efficiency, and scalability:
+
+-   **Solidity**: The language powering the contracts, used to define Q&A logic (v0.8.x).
+
+-   **Ancient8 Chain**: The blockchain network enabling fast, low-cost transactions.
+
+Together, these tools anchor InquireA’s decentralized features, from reward distribution to reputation tracking, all while optimizing gas efficiency!
+
+----------
 
 ## Project Structure
+
 ```
 .
-├── app/                  # Folder for Next.js app-specific routing and page components
-├── components/           # Contains reusable UI components like buttons, forms, modals, etc.
-├── configs/              # Contains configuration files for system settings or environment configurations
-├── constants/            # Contains constants used throughout the application
-├── contexts/             # Contains React contexts for managing global state across the app
-├── lib/                  # Contains reusable libraries or helper functions
-└── .env                  # Environment file 
+├── InquireA.sol          # Core contract managing the main Q&A logic, rewards, and interactions
+├── InquireConstants.sol  # Defines constant values like minimum fees, reward ratios, or time limits
+├── InquireEvent.sol      # Handles events such as question posting, answer selection, or reward distribution
+├── InquireModifier.sol   # Contains modifiers for access control, validation, or state checks
+├── InquireState.sol      # Manages the state variables for questions, answers, and user data
+└── InquireType.sol       # Defines custom types or structs for questions, answers, and reputation
 ```
+----------
 
-## Contributing
 
-Contributions are welcome! If you'd like to contribute to InquireA, please fork the repository, make your changes, and submit a pull request. We appreciate your help!
+## How to Contribute
+
+Ready to enhance this Q&A blockchain magic? We welcome contributions! Fork the repository, improve the contracts, and submit a pull request. Whether it’s adding new features (e.g., advanced reward tiers), optimizing gas usage, or fixing bugs, your efforts will make **InquireA** even more extraordinary! 🧠⚡
+
+----------
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+
+**InquireA - Smart Contracts** is released under the **MIT License**. Feel free to explore, modify, and share—just check the [LICENSE](./LICENSE) file for details.
